@@ -1,3 +1,4 @@
+from ctypes import sizeof
 import os
 import sys
 import struct
@@ -38,11 +39,12 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
     global rtt_min, rtt_max, rtt_sum, rtt_cnt
     timeLeft = timeout
     while 1:
+
         startedSelect = time.time()
         whatReady = select.select([mySocket], [], [], timeLeft)
         howLongInSelect = (time.time() - startedSelect)
         if whatReady[0] == []:  # Timeout
-            return "Request timed out."
+            return "Request timed out 1."
 
         timeReceived = time.time()
         recPacket, addr = mySocket.recvfrom(1024)
@@ -50,12 +52,30 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
         #Fill in start
 
         #Fetch the ICMP header from the IP packet
-
+        rtt_cnt += 1
+        ttl = recPacket[8]
+        icmp = recPacket[20:28]
+        size = struct.calcsize(
+            "bbHHh")  # comes out as 8, which seems right in IP header diagram.
+        rtt = round((timeReceived - startedSelect) * 1000, 2)
+        # print(
+        #     ttl,
+        #     addr,
+        #     size,
+        #     rtt,
+        # )
+        print("{} bytes from {}: icmp_seq={} ttl={} time={} ms".format(
+            size, destAddr, rtt_cnt, ttl, rtt))
+        if rtt < rtt_min:
+            rtt_min = rtt
+        if rtt > rtt_max:
+            rtt_max = rtt
+        rtt_sum += rtt
         #Fill in end
 
         timeLeft = timeLeft - howLongInSelect
         if timeLeft <= 0:
-            return "Request timed out."
+            return "Request timed out 2."
 
 
 def sendOnePing(mySocket, destAddr, ID):
