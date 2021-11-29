@@ -56,8 +56,7 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
         ttl = recPacket[8]
         icmp = recPacket[20:28]
         type, code, csum, id, seq = struct.unpack("bbHHh", icmp)
-        size = struct.calcsize(
-            "bbHHh")  # comes out as 8, which seems right in IP header diagram.
+        size = len(recPacket)
         rtt = round((timeReceived - startedSelect) * 1000, 2)
 
         #print only when appropriate Echo Reply comes in. type == 0 AND code == 0
@@ -68,8 +67,9 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
             if rtt > rtt_max:
                 rtt_max = rtt
             rtt_sum += rtt
-            return ("{} bytes from {}: icmp_seq={} ttl={} time={} ms".format(
-                size, destAddr, seq, ttl, rtt))
+            return (
+                "{} bytes from {}: icmp_seq={} ID={} ttl={} time={} ms".format(
+                    size, destAddr, seq, id, ttl, rtt))
 
         # print(
         #     ttl,
@@ -85,13 +85,13 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
             return "Request timed out 2."
 
 
-def sendOnePing(mySocket, destAddr, ID):
+def sendOnePing(mySocket, destAddr, ID, cnt):
     # Header is type (8), code (8), checksum (16), id (16), sequence (16)
 
     myChecksum = 0
     # Make a dummy header with a 0 checksum.
     # struct -- Interpret strings as packed binary data
-    header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, ID, 1)
+    header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, ID, cnt)
     data = struct.pack("d", time.time())
     # Calculate the checksum on the data and the dummy header.
     myChecksum = checksum(header + data)
@@ -103,7 +103,7 @@ def sendOnePing(mySocket, destAddr, ID):
     else:
         myChecksum = htons(myChecksum)
 
-    header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, ID, 1)
+    header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, ID, cnt)
     packet = header + data
     #print(packet) #prints binary string
 
@@ -113,7 +113,7 @@ def sendOnePing(mySocket, destAddr, ID):
     #which can be referenced by their position number within the object
 
 
-def doOnePing(destAddr, timeout):
+def doOnePing(destAddr, timeout, cnt):
     icmp = getprotobyname("icmp")
     #SOCK_RAW is a powerful socket type. For more details see: http://sock-raw.org/papers/sock_raw
 
@@ -125,7 +125,7 @@ def doOnePing(destAddr, timeout):
     #Fill in end
 
     myID = os.getpid() & 0xFFFF  #Return the current process i
-    sendOnePing(mySocket, destAddr, myID)
+    sendOnePing(mySocket, destAddr, myID, cnt)
     delay = receiveOnePing(mySocket, myID, timeout, destAddr)
 
     mySocket.close()
@@ -148,7 +148,7 @@ def ping(host, timeout=1):
     try:
         while True:
             cnt += 1
-            print(doOnePing(dest, timeout))
+            print(doOnePing(dest, timeout, cnt))
             time.sleep(1)
     except KeyboardInterrupt:
         if cnt != 0:
