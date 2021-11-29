@@ -44,7 +44,7 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
         whatReady = select.select([mySocket], [], [], timeLeft)
         howLongInSelect = (time.time() - startedSelect)
         if whatReady[0] == []:  # Timeout
-            return "Request timed out 1."
+            return ("Request timed out 1. startSelect=", startedSelect)
 
         timeReceived = time.time()
         recPacket, addr = mySocket.recvfrom(1024)
@@ -64,8 +64,8 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
         #     size,
         #     rtt,
         # )
-        print("{} bytes from {}: icmp_seq={} ttl={} time={} ms".format(
-            size, destAddr, rtt_cnt, ttl, rtt))
+        print("{} bytes from {}: icmp_seq={} ttl={} time={} ms startSelect={}".
+              format(size, destAddr, rtt_cnt, ttl, rtt, startedSelect))
         if rtt < rtt_min:
             rtt_min = rtt
         if rtt > rtt_max:
