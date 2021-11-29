@@ -15,13 +15,15 @@ def checksum(str):
 
     count = 0
     while count < countTo:
-        thisVal = ord(str[count + 1]) * 256 + ord(str[count])
+        #thisVal = ord(str[count + 1]) * 256 + ord(str[count])
+        thisVal = str[count + 1] * 256 + str[count]
         csum = csum + thisVal
         csum = csum & 0xffffffff  # does "L" need to be attatched at the end?
         count = count + 2
 
     if countTo < len(str):
-        csum = csum + ord(str[len(str) - 1])
+        #csum = csum + ord(str[len(str) - 1])
+        csum = csum + str[len(str) - 1]
         csum = csum & 0xffffffff  # does "L" need to be attatched at the end?
 
     csum = (csum >> 16) + (csum & 0xffff)
@@ -69,14 +71,14 @@ def sendOnePing(mySocket, destAddr, ID):
 
     # Get the right checksum, and put in the header
     if sys.platform == 'darwin':
-        myChecksum = socket.htons(myChecksum) & 0xffff
+        myChecksum = htons(myChecksum) & 0xffff
         #Convert 16-bit integers from host to network byte order.
     else:
-        myChecksum = socket.htons(myChecksum)
+        myChecksum = htons(myChecksum)
 
     header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, ID, 1)
     packet = header + data
-    print(packet)
+    #print(packet) #prints binary string
 
     mySocket.sendto(packet,
                     (destAddr, 1))  # AF_INET address must be tuple, not str
@@ -97,11 +99,11 @@ def doOnePing(destAddr, timeout):
 
     myID = os.getpid() & 0xFFFF  #Return the current process i
     sendOnePing(mySocket, destAddr, myID)
-    #delay = receiveOnePing(mySocket, myID, timeout, destAddr)
+    delay = receiveOnePing(mySocket, myID, timeout, destAddr)
 
     mySocket.close()
-    #return delay
-    return "check"
+    return delay
+    #return "check"
 
 
 def ping(host, timeout=1):
