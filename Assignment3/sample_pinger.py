@@ -3,7 +3,7 @@ import sys
 import struct
 import time
 import select
-import socket
+from socket import *
 import binascii
 
 ICMP_ECHO_REQUEST = 8
@@ -76,6 +76,7 @@ def sendOnePing(mySocket, destAddr, ID):
 
     header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, ID, 1)
     packet = header + data
+    print(packet)
 
     mySocket.sendto(packet,
                     (destAddr, 1))  # AF_INET address must be tuple, not str
@@ -84,21 +85,23 @@ def sendOnePing(mySocket, destAddr, ID):
 
 
 def doOnePing(destAddr, timeout):
-    icmp = socket.getprotobyname("icmp")
+    icmp = getprotobyname("icmp")
     #SOCK_RAW is a powerful socket type. For more details see: http://sock-raw.org/papers/sock_raw
 
     #Fill in start
 
     #Create Socket here
+    mySocket = socket(AF_INET, SOCK_RAW, icmp)
 
     #Fill in end
 
     myID = os.getpid() & 0xFFFF  #Return the current process i
     sendOnePing(mySocket, destAddr, myID)
-    delay = receiveOnePing(mySocket, myID, timeout, destAddr)
+    #delay = receiveOnePing(mySocket, myID, timeout, destAddr)
 
     mySocket.close()
-    return delay
+    #return delay
+    return "check"
 
 
 def ping(host, timeout=1):
@@ -110,7 +113,7 @@ def ping(host, timeout=1):
     cnt = 0
     #timeout=1 means: If one second goes by without a reply from the server,
     #the client assumes that either the client's ping or the server's pong is lost
-    dest = socket.gethostbyname(host)
+    dest = gethostbyname(host)
     print("Pinging " + dest + " using Python:")
     #Send ping requests to a server separated by approximately one second
     try:
