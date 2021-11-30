@@ -44,7 +44,7 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
         whatReady = select.select([mySocket], [], [], timeLeft)
         howLongInSelect = (time.time() - startedSelect)
         if whatReady[0] == []:  # Timeout
-            return "Request Timeout 1. "
+            return "Request Timeout. "
 
         timeReceived = time.time()
         recPacket, addr = mySocket.recvfrom(1024)
@@ -56,33 +56,28 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
         ttl = recPacket[8]
         icmp = recPacket[20:28]
         type, code, csum, id, seq = struct.unpack("bbHHh", icmp)
-        size = len(recPacket)
+        #default ICMP packet size is 56 bytes. including 8 byte header = 64 bytes
+        size = 64
         rtt = round((timeReceived - startedSelect) * 1000, 2)
 
         #print only when appropriate Echo Reply comes in. type == 0 AND code == 0
         if type == 0 and code == 0:
+            # count received packets
             rtt_cnt += 1
+            #calcualte minimum, maximum, and sum of rtt
             if rtt < rtt_min:
                 rtt_min = rtt
             if rtt > rtt_max:
                 rtt_max = rtt
             rtt_sum += rtt
-            return (
-                "{} bytes from {}: icmp_seq={} ID={} ttl={} time={} ms".format(
-                    size, destAddr, seq, id, ttl, rtt))
-
-        # print(
-        #     ttl,
-        #     addr,
-        #     size,
-        #     rtt,
-        # )
+            return ("{} bytes from {}: icmp_seq={} ttl={} time={} ms".format(
+                size, destAddr, seq, ttl, rtt))
 
         #Fill in end
 
         timeLeft = timeLeft - howLongInSelect
         if timeLeft <= 0:
-            return "Request timed out 2."
+            return "Request timed out."
 
 
 def sendOnePing(mySocket, destAddr, ID, cnt):
