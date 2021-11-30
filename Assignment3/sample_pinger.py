@@ -4,7 +4,7 @@ import sys
 import struct
 import time
 import select
-from socket import *
+import socket
 import binascii
 
 ICMP_ECHO_REQUEST = 8
@@ -91,10 +91,10 @@ def sendOnePing(mySocket, destAddr, ID):
 
     # Get the right checksum, and put in the header
     if sys.platform == 'darwin':
-        myChecksum = htons(myChecksum) & 0xffff
+        myChecksum = socket.htons(myChecksum) & 0xffff
         #Convert 16-bit integers from host to network byte order.
     else:
-        myChecksum = htons(myChecksum)
+        myChecksum = socket.htons(myChecksum)
 
     header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, ID, 1)
     packet = header + data
@@ -107,13 +107,13 @@ def sendOnePing(mySocket, destAddr, ID):
 
 
 def doOnePing(destAddr, timeout):
-    icmp = getprotobyname("icmp")
+    icmp = socket.getprotobyname("icmp")
     #SOCK_RAW is a powerful socket type. For more details see: http://sock-raw.org/papers/sock_raw
 
     #Fill in start
 
     #Create Socket here
-    mySocket = socket(AF_INET, SOCK_RAW, icmp)
+    mySocket = socket.socket(socket.AF_INET, socket.SOCK_RAW, icmp)
     #Fill in end
 
     myID = os.getpid() & 0xFFFF  #Return the current process i
@@ -134,7 +134,7 @@ def ping(host, timeout=1):
     cnt = 0
     #timeout=1 means: If one second goes by without a reply from the server,
     #the client assumes that either the client's ping or the server's pong is lost
-    dest = gethostbyname(host)
+    dest = socket.gethostbyname(host)
     print("Pinging " + dest + " using Python:")
     #Send ping requests to a server separated by approximately one second
     try:
