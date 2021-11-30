@@ -39,7 +39,6 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
     global rtt_min, rtt_max, rtt_sum, rtt_cnt
     timeLeft = timeout
     while 1:
-
         startedSelect = time.time()
         whatReady = select.select([mySocket], [], [], timeLeft)
         howLongInSelect = (time.time() - startedSelect)
@@ -56,12 +55,11 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
         ttl = recPacket[8]
         icmp = recPacket[20:28]
         type, code, csum, id, seq = struct.unpack("bbHHh", icmp)
-        #default ICMP packet size is 56 bytes. including 8 byte header = 64 bytes
-        size = 64
+        size = 64  #default ICMP packet size is 56 bytes. including 8 byte header = 64 bytes
         rtt = round((timeReceived - startedSelect) * 1000, 2)
 
         #print only when appropriate Echo Reply comes in. type == 0 AND code == 0
-        if type == 0 and code == 0:
+        if type == 0 and code == 0 and id == ID:
             # count received packets
             rtt_cnt += 1
             #calcualte minimum, maximum, and sum of rtt
@@ -71,7 +69,7 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
                 rtt_max = rtt
             rtt_sum += rtt
             return ("{} bytes from {}: icmp_seq={} ttl={} time={} ms".format(
-                size, destAddr, seq, ttl, rtt))
+                size, addr, seq, ttl, rtt))
 
         #Fill in end
 
@@ -116,7 +114,6 @@ def doOnePing(destAddr, timeout):
 
     #Create Socket here
     mySocket = socket(AF_INET, SOCK_RAW, icmp)
-
     #Fill in end
 
     myID = os.getpid() & 0xFFFF  #Return the current process i
