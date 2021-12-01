@@ -69,7 +69,7 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
                 rtt_max = rtt
             rtt_sum += rtt
             return ("{} bytes from {}: icmp_seq={} ttl={} time={} ms".format(
-                size, addr, seq, ttl, rtt))
+                size, addr[0], seq, ttl, rtt))
 
         #Fill in end
 
