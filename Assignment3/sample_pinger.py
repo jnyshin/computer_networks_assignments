@@ -1,3 +1,5 @@
+# Yejin Shin, yejin.shin@stonybrook.edu, 111850347
+
 from ctypes import sizeof
 import os
 import sys
