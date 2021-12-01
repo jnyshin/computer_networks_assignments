@@ -14,4 +14,4 @@
 5. 43.245.43.59 / unimelb.edu.au
 6. 200.89.76.36 / uchile.cl
 
-ex) To ping <b>ox.ax.uk</b> in Mac, type `sudo python sample_pinger ox.ax.uk`.
+ex) To ping <b>ox.ax.uk</b> in Mac, type `sudo python sample_pinger.py ox.ax.uk`.
