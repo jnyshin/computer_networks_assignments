@@ -1,11 +1,13 @@
-My analysis_pcap_tcp.py is a pcap file parser for TCP files specifically. It used dpkt library. There are two classes(objects) I made, Packet and Flow. These were very useful since numerous variables of pcap file were used in this assignment. It may take some time to convert all pcap packets to Packet and Flow object, but the variables were very easy to reach after the process.
+#### Assignment 2
+This assignment was to analyze a pcap file, especially for TCP entries. The ```dpkt``` library was used to disassemble the entries.<br>
+There are two classes(objects) I made, <b>Packet</b> and <b>Flow</b>. Using these two classes helped a lot, since there were thousands of pcap entries. It may take some time to convert all pcap packets to Packet and Flow object, but the variables were very easy to reach after the process.
 
-1. class Packet
+1. class <b>Packet</b>
 
 - contains all specifications about one TCP packet.
 - windowScaleFactor was used to display as the window size in WireShark. It is mentioned in the option section of TCP packet only some times, when window size is huge while the same scale factor is applied everytime. Therefore I have set the variable windowScaleFactor for convenienve.
 
-2. class Flow
+2. class <b>Flow</b>
 
 - contains necessary fields to organize tcp packets into flows. Since the packtets are considered as group of same flow if they move between same source port and destination port.
 - packets filed is used to contain this flow's packets in order.
